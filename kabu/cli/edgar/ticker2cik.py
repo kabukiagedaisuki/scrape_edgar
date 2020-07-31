@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 @click.argument("company", type=click.STRING)
 @click.argument("ymd_qtr", type=click.STRING)
 @click.argument("filing", type=click.STRING)
-def cmd(company, ymd_qtr, filing):
+def t2c(company, ymd_qtr, filing):
     # url = 'https://sec.report/Ticker/' + ticker
     # headers = { 'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.76 Safari/537.36' }
     #t_url = 'https://www.sec.gov/include/ticker.txt'

@@ -1,9 +1,9 @@
 from setuptools import find_packages, setup
 
 setup (
-    name         = "edgar",
+    name         = "scrape_edgar",
     version      = "0.0.1",
     entry_points = {
-        "console_scripts" : [ "edgar = edgar.__main__:main" ],
+        "console_scripts" : [ "scrape_edgar = scrape_edgar.__main__:main" ],
     }
 )
