@@ -38,7 +38,7 @@ def earnings(ticker):
         #print (ts)
         driver.get("https://seekingalpha.com/symbol/"+ ts + "/earnings")
         elem = driver.find_elements_by_class_name("panel-heading")
-        print (elem)
+        #print (elem)
         [print (ts, e.text) for  e in elem]
         elem.clear()
         assert "No results found." not in driver.page_source
@@ -84,49 +84,135 @@ def momentum(ticker):
 
 def financials(ticker):
     columnlist= [
-        "Revenue Per Share",
-        "Basic EPS",
-        "Basic EPS - Continuing Ops",
-        "Basic Weighted Average Shares Outst.",
+        #======= https://seekingalpha.com/symbol/FB/income-statement
+        #"Revenues",
+        #"Other Revenues",
+        "Total Revenues",
+        #"Cost Of Revenues",
+        #"Gross Profit",
+        #"Selling General & Admin Expenses",
+        #"R&D Expenses",
+        #"Total Operating Expenses",
+        #"Operating Income",
+        #"Interest Expens",
+        #"Interest And Investment Income",
+        #"Net Interest Expenses",
+        #"Currency Exchange Gains",
+        #"Other Non Operating Income (Expenses)",
+        #"EBT, Excl. Unusual Items",
+        #"EBT, Incl. Unusual Items",
+        #"Income Tax Expense",
+        #"Earnings From Continuing Operations",
+        #"Net Income to Company",
+        #"Net Income",
+        #"Preferred Dividend and Other Adjustments",
+        #"NI to Common Incl Extra Items",
+        #"NI to Common Excl. Extra Items",
+        #"Revenue Per Share",
+        #"Basic EPS",
+        #"Basic EPS - Continuing Ops",
+        #"Basic Weighted Average Shares Outst.",
         "Diluted EPS",
-        "Diluted EPS - Continuing Ops",
+        #"Diluted EPS - Continuing Ops",
         "Diluted Weighted Average Shares Outst.",
-        "Normalized Basic EPS",
-        "Normalized Diluted EPS",
+        #"Normalized Basic EPS",
+        #"Normalized Diluted EPS",
         "Dividend Per Share",
-        "Payout Ratio",
-        "EBITDA",
-        "EBITA",
-        "EBIT",
-        "EBITDAR",
-        "Effective Tax Rate",
-        "Normalized Net Income",
-        "Interest Capitalized",
-        "Interest on Long-Term Debt",
-        "R&D Expense From Footnotes",
-        "Foreign Sales"
+        #"Payout Ratio",
+        #"EBITDA",
+        #"EBITA",
+        #"EBIT",
+        #"EBITDAR",
+        #"Effective Tax Rate",
+        #"Normalized Net Income",
+        #"Interest Capitalized",
+        #"Interest on Long-Term Debt",
+        #"R&D Expense From Footnotes",
+        #"Foreign Sales",
+        #======= https://seekingalpha.com/symbol/FB/cash-flow-statement
+        #"Net Income",
+        #"Depreciation & Amortization",
+        #"Amort. of Goodwill and Intangibles",
+        #"Depreciation & Amortization, Total",
+        #"(Gain) Loss From Sale Of Asset",
+        #"Asset Writedown & Restruc. Costs",
+        #"Stock-Based Compensation",
+        #"Other Operating Activities",
+        #"Change In Accounts Receivable",
+        #"Change In Accounts Payable",
+        #"Change in Other Net Operating Assets",
+        "Cash from Operations",
+        #"Capital Expenditure",
+        #"Cash Acquisitions",
+        #"Invest. in Marketable & Equity Securt.",
+        #"Other Investing Activities",
+        #"Cash from Investing",
+        #"Short Term Debt Issued",
+        #"Long-Term Debt Issued",
+        #"Total Debt Issued",
+        #"Short Term Debt Repaid",
+        #"Long-Term Debt Repaid",
+        #"Total Debt Repaid",
+        #"Issuance of Common Stock",
+        #"Repurchase of Common Stock",
+        #"Other Financing Activities",
+        #"Cash from Financing",
+        #"Foreign Exchange Rate Adjustments",
+        #"Net Change in Cash",
+        #"Cash Interest Paid",
+        #"Cash Income Tax Paid",
+        #"Net Capital Expenditure",
+        #"Levered Free Cash Flow",
+        #"Unlevered Free Cash Flow",
+        #"Change In Net Working Capital",
+        #"Free Cash Flow / Share",
+        #"Net Debt Issued / Repaid"
     ]
 
     options = Options()
     options.add_argument('-headless')
     driver = webdriver.Firefox(firefox_options=options)
-    lines = ["intc"]
+    lines  = ticker.split()
     for l in lines:
+        ts = l.split()[0] if ticker == "ALL" else l
+        #print (ts)
         #ts = l.split()[0]
         #print (ts)
         #print (l)
-        driver.get("https://seekingalpha.com/symbol/"+ l + "/income-statement")
-        div = driver.find_element_by_id("supplemental_items")
+        driver.get("https://seekingalpha.com/symbol/"+ ts + "/income-statement")
+        div  = driver.find_element_by_id("financial-export-data")
         elem = div.find_elements_by_tag_name("tbody")
+        flg  = 0
         for e in elem:
             for l in e.text.split('\n'):
                 if l in columnlist:
                     print (l + " ", end='')
-                else:
+                    flg = 1
+                elif flg == 1:
                     print (l)
+                    flg = 0
+                else:
+                    flg = 0
     
-        assert "No results found." not in driver.page_source
         time.sleep(2)
+        print ("----------------------")
+
+        driver.get("https://seekingalpha.com/symbol/"+ ts + "/cash-flow-statement")
+        div  = driver.find_element_by_id("financial-export-data")
+        elem = div.find_elements_by_tag_name("tbody")
+        flg  = 0
+        for e in elem:
+            for l in e.text.split('\n'):
+                if l in columnlist:
+                    print (l + " ", end='')
+                    flg = 1
+                elif flg == 1:
+                    print (l)
+                    flg = 0
+                else:
+                    flg = 0
+
+        assert "No results found." not in driver.page_source
     
     driver.close()
 
