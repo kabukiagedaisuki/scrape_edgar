@@ -172,6 +172,8 @@ def financials(ticker):
     options = Options()
     options.add_argument('-headless')
     driver = webdriver.Firefox(firefox_options=options)
+    driver.set_page_load_timeout(180)
+
     lines  = ticker.split()
     for l in lines:
         ts = l.split()[0] if ticker == "ALL" else l
@@ -182,39 +184,105 @@ def financials(ticker):
         driver.get("https://seekingalpha.com/symbol/"+ ts + "/income-statement")
         div  = driver.find_element_by_id("financial-export-data")
         elem = div.find_elements_by_tag_name("tbody")
-        flg  = 0
+
+        sales_flg  = 0
+        eps_flg    = 0
+        share_flg  = 0
+        dps_flg    = 0
+        sales      = []
+        eps        = []
+        share      = []
+        dps        = []
+
         for e in elem:
             for l in e.text.split('\n'):
-                if l in columnlist:
-                    print (l + " ", end='')
-                    flg = 1
-                elif flg == 1:
-                    print (l)
-                    flg = 0
-                else:
-                    flg = 0
-    
+                if l == "Total Revenues":
+                    sales_flg = 1
+                    continue
+                elif l == "Diluted EPS":
+                    eps_flg   = 1
+                    continue
+                elif l == "Diluted Weighted Average Shares Outst.":
+                    share_flg = 1
+                    continue
+                elif l == "Dividend Per Share":
+                    dps_flg   = 1
+                    continue
+
+                if sales_flg == 1:
+                    [(sales.append(str2float(num))) for num in l.split(' ')]
+                    sales_flg = 0
+                    continue
+                elif eps_flg == 1:
+                    [(eps.append(str2float(num))) for num in l.split(' ')]
+                    eps_flg   = 0
+                    continue
+                elif share_flg == 1:
+                    [(share.append(str2float(num))) for num in l.split(' ')]
+                    share_flg = 0
+                    continue
+                elif dps_flg == 1:
+                    [(dps.append(str2float(num))) for num in l.split(' ')]
+                    dps_flg   = 0
+                    continue
+
+        dps = [0, 0, 0, 0, 0] if len(dps) == 0 else dps[:-1]
+        del sales[-1]
+        del eps[-1]
+        del share[-1]
+
         time.sleep(2)
-        print ("----------------------")
 
         driver.get("https://seekingalpha.com/symbol/"+ ts + "/cash-flow-statement")
         div  = driver.find_element_by_id("financial-export-data")
         elem = div.find_elements_by_tag_name("tbody")
-        flg  = 0
+
+        cash_flg = 0
+        cash     = []
+
         for e in elem:
             for l in e.text.split('\n'):
-                if l in columnlist:
-                    print (l + " ", end='')
-                    flg = 1
-                elif flg == 1:
-                    print (l)
-                    flg = 0
-                else:
-                    flg = 0
+                if l == "Cash from Operations":
+                    cash_flg = 1
+                    continue
+
+                if cash_flg == 1:
+                    [(cash.append(str2float(num))) for num in l.split(' ')]
+                    cash_flg = 0
+                    continue
+
+        del cash[-1]
+
+        print ("sales:", end="")
+        print (sales)
+        print ("share:", end="")
+        print (share)
+        print ("cash :", end="")
+        print (cash)
+        print ("----------------------------------")
+
+        sps = []
+        cfps= []
+        
+        [(sps.append(round(sales[i]/share[i], 2))) for i in range(5)]
+        [(cfps.append(round(cash[i]/share[i], 2))) for i in range(5)]
+
+        print ("DPS :", end="")
+        print (dps)
+        print ("EPS :", end="")
+        print (eps)
+        print ("CFPS:", end="")
+        print (cfps)
+        print ("SPS :", end="")
+        print (sps)
 
         assert "No results found." not in driver.page_source
     
     driver.close()
+
+
+def str2float(s):
+    return float(s.replace('$', '').replace(',', ''))
 
 
     # user_agent = "Mozilla/5.0 (iPhone; CPU iPhone OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.1 Mobile/15E148 Safari/604.1"
