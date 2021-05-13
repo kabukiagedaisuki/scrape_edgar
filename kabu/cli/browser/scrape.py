@@ -3,6 +3,7 @@ import requests
 #import json
 import re
 #import sys
+from tabulate import tabulate
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -172,8 +173,9 @@ def financials(ticker):
     options = Options()
     options.add_argument('-headless')
     driver = webdriver.Firefox(firefox_options=options)
-    driver.set_page_load_timeout(180)
+    #driver.set_page_load_timeout(180)
 
+    headers = ["", "2016", "2017", "2018", "2019", "2020"]
     lines  = ticker.split()
     for l in lines:
         ts = l.split()[0] if ticker == "ALL" else l
@@ -253,28 +255,25 @@ def financials(ticker):
 
         del cash[-1]
 
-        print ("sales:", end="")
-        print (sales)
-        print ("share:", end="")
-        print (share)
-        print ("cash :", end="")
-        print (cash)
-        print ("----------------------------------")
-
         sps = []
         cfps= []
         
         [(sps.append(round(sales[i]/share[i], 2))) for i in range(5)]
         [(cfps.append(round(cash[i]/share[i], 2))) for i in range(5)]
 
-        print ("DPS :", end="")
-        print (dps)
-        print ("EPS :", end="")
-        print (eps)
-        print ("CFPS:", end="")
-        print (cfps)
-        print ("SPS :", end="")
-        print (sps)
+        table = [["DPS",    dps[0],  dps[1],  dps[2],  dps[3],  dps[4]],
+                 ["EPS",    eps[0],  eps[1],  eps[2],  eps[3],  eps[4]],
+                 ["CFPS",  cfps[0], cfps[1], cfps[2], cfps[3], cfps[4]],
+                 ["SPS",    sps[0],  sps[1],  sps[2],  sps[3],  sps[4]],
+                 ["share",share[0],share[1],share[2],share[3],share[4]]]
+
+        #print ("sales:", end="")
+        #print (sales)
+        #print ("cash :", end="")
+        #print (cash)
+        #print ("share :", end="")
+        #print (share)
+        print(tabulate(table, headers, tablefmt="psql"))
 
         assert "No results found." not in driver.page_source
     
